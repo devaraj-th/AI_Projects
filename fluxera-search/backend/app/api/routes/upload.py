@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.core.config import settings
 from app.db.models import User
 from app.db.session import get_db
 from app.schemas.document import DocumentOut, GitUploadRequest, UrlUploadRequest
@@ -20,6 +21,11 @@ async def upload_document(
     data = await file.read()
     if not data:
         raise HTTPException(status_code=400, detail="Empty file")
+    if len(data) > settings.upload_max_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File too large. Max allowed size is {settings.upload_max_mb} MB.",
+        )
 
     service = IngestService(db)
     try:

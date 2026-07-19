@@ -28,7 +28,12 @@ class Settings(BaseSettings):
     default_max_tokens: int = 700
 
     upload_max_mb: int = 50
+    max_chunks_per_document: int = 500
     top_k: int = 10
+    retrieval_min_score: float = 0.45
+    web_fallback_score_threshold: float = 0.60
+    web_search_enabled: bool = True
+    web_search_max_results: int = 5
 
 
 @lru_cache

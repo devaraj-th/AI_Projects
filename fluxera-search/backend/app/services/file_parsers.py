@@ -19,9 +19,12 @@ def parse_file_bytes(filename: str, data: bytes) -> str:
     if suffix == ".pdf":
         from io import BytesIO
 
-        reader = PdfReader(BytesIO(data))
-        pages = [page.extract_text() or "" for page in reader.pages]
-        return "\n\n".join(pages)
+        try:
+            reader = PdfReader(BytesIO(data))
+            pages = [page.extract_text() or "" for page in reader.pages]
+            return "\n\n".join(pages)
+        except Exception as exc:
+            raise ValueError("Unable to parse PDF. The file may be encrypted, corrupted, or image-only.") from exc
 
     if suffix == ".docx":
         from io import BytesIO

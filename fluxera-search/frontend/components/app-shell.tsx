@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -20,7 +21,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="mx-auto min-h-screen max-w-6xl px-5 pb-10">
       <header className="sticky top-3 z-20 mt-3 rounded-2xl border border-line bg-white/85 p-3 shadow-soft backdrop-blur dark:bg-slate-950/80">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-lg font-semibold tracking-tight">Fluxera Search</h1>
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="Fluxera logo" width={36} height={36} className="h-9 w-9 rounded-md object-contain" />
+            <h1 className="text-lg font-semibold tracking-tight">Fluxera Search</h1>
+          </div>
           <nav className="flex flex-wrap gap-2 text-sm">
             {nav.map(([href, label]) => (
               <Link

@@ -10,12 +10,18 @@ from app.db.models import Conversation, Message
 from app.schemas.chat import Citation, ChatRequest
 from app.services.model_router import resolve_model
 from app.services.retrieval_service import RetrievalService
+from app.services.web_search_service import WebSearchService
 
 
-SYSTEM_PROMPT = """You are Fluxera Search, an enterprise AI search assistant.
-Answer based only on provided context chunks.
-Every paragraph must include [n] style citation markers.
-If the answer cannot be found, clearly say you do not know.
+SYSTEM_PROMPT = """You are Fluxera Search, a friendly enterprise AI assistant.
+Always start your response with a short greeting.
+Answer only from the provided context.
+If context includes [Wn] web sources, use them directly to answer.
+If web sources are provided, do not reply with "I do not know".
+When you use local context, include [n] citation markers.
+When you use web context, include [Wn] citation markers.
+If neither context contains the answer, reply exactly: "Hello! I do not know based on the available context."
+Do not use outside knowledge.
 """
 
 
@@ -31,24 +37,123 @@ class ChatService:
         except Exception:
             # Keep chat available even if retrieval backend is temporarily unavailable.
             hits = []
-        citations = [
-            Citation(
-                id=i + 1,
-                document_id=hit.document_id,
-                title=hit.title,
-                source_uri=None,
-                chunk_index=hit.chunk_index,
-                score=hit.score,
-                excerpt=hit.content[:300],
-            )
-            for i, hit in enumerate(hits)
-        ]
+
+        # Guardrail: treat low-similarity matches as out-of-context.
+        hits = [hit for hit in hits if hit.score >= settings.retrieval_min_score]
+
+        # Avoid false positives from vector-only similarity by requiring lexical overlap.
+        punctuation = ".,!?;:\"'()[]{}"
+        stop_words = {
+            "what",
+            "who",
+            "when",
+            "where",
+            "why",
+            "how",
+            "is",
+            "are",
+            "the",
+            "a",
+            "an",
+            "of",
+            "in",
+            "to",
+            "for",
+            "and",
+            "today",
+        }
+
+        query_terms = {
+            term.strip(punctuation).lower()
+            for term in req.question.split()
+            if len(term.strip()) > 2 and term.strip(punctuation).lower() not in stop_words
+        }
+
+        def has_overlap(content: str) -> bool:
+            content_terms = {
+                token.strip(punctuation).lower()
+                for token in content.split()
+                if len(token.strip()) > 2
+            }
+            return bool(query_terms.intersection(content_terms))
+
+        hits = [hit for hit in hits if has_overlap(hit.content)]
+
+        web_results = []
+        use_web = False
+        top_local_score = hits[0].score if hits else 0.0
+        local_is_weak = (not hits) or (top_local_score < settings.web_fallback_score_threshold)
+        if local_is_weak and settings.web_search_enabled:
+            web_results = await WebSearchService().search(req.question, max_results=settings.web_search_max_results)
+            use_web = bool(web_results)
+
+        if use_web:
+            # Prefer explicit web evidence over weak local matches.
+            hits = []
+
+        citations: list[Citation] = []
+        if hits:
+            citations = [
+                Citation(
+                    id=i + 1,
+                    document_id=hit.document_id,
+                    title=hit.title,
+                    source_uri=None,
+                    chunk_index=hit.chunk_index,
+                    score=hit.score,
+                    excerpt=hit.content[:300],
+                )
+                for i, hit in enumerate(hits)
+            ]
+        elif use_web:
+            citations = [
+                Citation(
+                    id=i + 1,
+                    document_id=0,
+                    title=result.title,
+                    source_uri=result.url,
+                    chunk_index=i,
+                    score=1.0,
+                    excerpt=result.snippet[:300],
+                )
+                for i, result in enumerate(web_results)
+            ]
 
         conversation = self._get_or_create_conversation(req)
         self.db.add(Message(conversation_id=conversation.id, role="user", content=req.question))
         self.db.commit()
 
-        context_lines = [f"[{i + 1}] {hit.title} (chunk {hit.chunk_index}): {hit.content}" for i, hit in enumerate(hits)]
+        if not hits and not use_web:
+            out_of_context = "Hello! I do not know based on the available context."
+            self.db.add(
+                Message(
+                    conversation_id=conversation.id,
+                    role="assistant",
+                    content=out_of_context,
+                    citations_json="[]",
+                )
+            )
+            self.db.commit()
+            yield f"data: {json.dumps({'type': 'token', 'token': out_of_context})}\n\n"
+            yield (
+                "data: "
+                + json.dumps(
+                    {
+                        "type": "done",
+                        "conversation_id": conversation.id,
+                        "citations": [],
+                        "follow_ups": [],
+                    }
+                )
+                + "\n\n"
+            )
+            return
+
+        if hits:
+            context_lines = [f"[{i + 1}] {hit.title} (chunk {hit.chunk_index}): {hit.content}" for i, hit in enumerate(hits)]
+        else:
+            context_lines = [f"[W{i + 1}] {result.title}: {result.snippet} ({result.url})" for i, result in enumerate(web_results)]
+
         prompt = (
             (req.system_prompt or SYSTEM_PROMPT)
             + "\n\nContext:\n"

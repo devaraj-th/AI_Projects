@@ -2,6 +2,27 @@ import { Citation } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
+function resolveDirectBackendBase(): string | null {
+  if (typeof window === "undefined") return null;
+
+  const protocol = window.location.protocol;
+  const host = window.location.host;
+
+  if (host.includes("-3000.app.github.dev")) {
+    return `${protocol}//${host.replace("-3000.", "-8000.")}`;
+  }
+
+  if (host.startsWith("localhost:3000")) {
+    return `${protocol}//localhost:8000`;
+  }
+
+  if (host.startsWith("127.0.0.1:3000")) {
+    return `${protocol}//127.0.0.1:8000`;
+  }
+
+  return null;
+}
+
 export async function login(email: string, password: string): Promise<string> {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",
@@ -26,16 +47,31 @@ export async function fetchHistory(token: string) {
 export async function uploadDocument(token: string, file: File) {
   const formData = new FormData();
   formData.append("file", file);
-  const res = await fetch(`${API_BASE}/upload`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Upload failed (${res.status}): ${body}`);
+  const directBase = resolveDirectBackendBase();
+  const urls = directBase ? [`${directBase}/upload`, `${API_BASE}/upload`] : [`${API_BASE}/upload`];
+
+  let lastError: unknown = null;
+  for (const uploadUrl of urls) {
+    try {
+      const res = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Upload failed (${res.status}): ${body}`);
+      }
+      return res.json();
+    } catch (err) {
+      lastError = err;
+    }
   }
-  return res.json();
+
+  if (lastError instanceof Error) {
+    throw lastError;
+  }
+  throw new Error("Upload failed: network error");
 }
 
 export async function streamChat(
@@ -52,47 +88,63 @@ export async function streamChat(
   onToken: (token: string) => void,
   onDone: (meta: { conversation_id: number; citations: Citation[]; follow_ups: string[] }) => void
 ) {
-  const res = await fetch(`${API_BASE}/chat`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
+  const directBase = resolveDirectBackendBase();
+  const urls = directBase ? [`${directBase}/chat`, `${API_BASE}/chat`] : [`${API_BASE}/chat`];
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Chat request failed (${res.status}): ${body}`);
-  }
+  let lastError: unknown = null;
+  for (const chatUrl of urls) {
+    try {
+      const res = await fetch(chatUrl, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
 
-  if (!res.body) throw new Error("No response stream");
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder("utf-8");
-  let buffer = "";
-  let seenDone = false;
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const events = buffer.split("\n\n");
-    buffer = events.pop() || "";
-
-    for (const event of events) {
-      if (!event.startsWith("data:")) continue;
-      const raw = event.replace("data:", "").trim();
-      const parsed = JSON.parse(raw);
-      if (parsed.type === "token") onToken(parsed.token);
-      if (parsed.type === "error") throw new Error(parsed.error || "Chat stream failed.");
-      if (parsed.type === "done") {
-        seenDone = true;
-        onDone(parsed);
+      if (!res.ok) {
+        const body = await res.text();
+        throw new Error(`Chat request failed (${res.status}): ${body}`);
       }
+
+      if (!res.body) throw new Error("No response stream");
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let buffer = "";
+      let seenDone = false;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const events = buffer.split("\n\n");
+        buffer = events.pop() || "";
+
+        for (const event of events) {
+          if (!event.startsWith("data:")) continue;
+          const raw = event.replace("data:", "").trim();
+          const parsed = JSON.parse(raw);
+          if (parsed.type === "token") onToken(parsed.token);
+          if (parsed.type === "error") throw new Error(parsed.error || "Chat stream failed.");
+          if (parsed.type === "done") {
+            seenDone = true;
+            onDone(parsed);
+          }
+        }
+      }
+
+      if (!seenDone) {
+        throw new Error("Chat stream ended unexpectedly. Verify selected model is available in Ollama.");
+      }
+      return;
+    } catch (err) {
+      lastError = err;
     }
   }
 
-  if (!seenDone) {
-    throw new Error("Chat stream ended unexpectedly. Verify selected model is available in Ollama.");
+  if (lastError instanceof Error) {
+    throw lastError;
   }
+  throw new Error("Chat request failed: network error");
 }

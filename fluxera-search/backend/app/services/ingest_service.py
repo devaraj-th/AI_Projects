@@ -4,6 +4,7 @@ from pathlib import Path
 import httpx
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.db.models import Document, DocumentChunk
 from app.services.embedding_service import EmbeddingService
 from app.services.file_parsers import parse_file_bytes
@@ -18,6 +19,10 @@ class IngestService:
     async def ingest_upload(self, filename: str, payload: bytes, mime_type: str | None = None) -> Document:
         text = parse_file_bytes(filename, payload)
         chunks = chunk_text(text)
+        if not chunks:
+            raise ValueError("No extractable text found in the uploaded file")
+        if len(chunks) > settings.max_chunks_per_document:
+            chunks = chunks[: settings.max_chunks_per_document]
 
         document = Document(
             title=filename,
@@ -81,6 +86,15 @@ class IngestService:
                 mime_type="text/plain",
             )
 
+    async def ingest_text(self, title: str, text: str, source_uri: str = "seed://local") -> Document:
+        return await self._persist_document(
+            title=title,
+            source_type="seed",
+            source_uri=source_uri,
+            text=text,
+            mime_type="text/plain",
+        )
+
     async def _persist_document(
         self,
         title: str,
@@ -90,6 +104,10 @@ class IngestService:
         mime_type: str | None,
     ) -> Document:
         chunks = chunk_text(text)
+        if not chunks:
+            raise ValueError("No extractable text found in the provided source")
+        if len(chunks) > settings.max_chunks_per_document:
+            chunks = chunks[: settings.max_chunks_per_document]
         document = Document(
             title=title,
             source_type=source_type,
