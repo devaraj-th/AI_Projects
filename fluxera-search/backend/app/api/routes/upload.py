@@ -22,7 +22,14 @@ async def upload_document(
         raise HTTPException(status_code=400, detail="Empty file")
 
     service = IngestService(db)
-    document = await service.ingest_upload(file.filename, data, file.content_type)
+    try:
+        document = await service.ingest_upload(file.filename, data, file.content_type)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Upload processing failed: {exc}") from exc
     return DocumentOut.model_validate(document)
 
 

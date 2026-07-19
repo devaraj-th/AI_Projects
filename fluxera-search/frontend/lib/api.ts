@@ -1,6 +1,6 @@
 import { Citation } from "@/lib/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 export async function login(email: string, password: string): Promise<string> {
   const res = await fetch(`${API_BASE}/auth/login`, {
@@ -31,7 +31,10 @@ export async function uploadDocument(token: string, file: File) {
     headers: { Authorization: `Bearer ${token}` },
     body: formData
   });
-  if (!res.ok) throw new Error("Upload failed");
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Upload failed (${res.status}): ${body}`);
+  }
   return res.json();
 }
 

@@ -17,6 +17,11 @@ def chunk_text(text: str, chunk_size: int = 1200, overlap: int = 180) -> list[st
                 chunk = text[start:end]
 
         chunks.append(chunk.strip())
-        start = max(end - overlap, start + 1)
+        if end >= length:
+            break
+
+        next_start = end - overlap
+        # Ensure forward progress for short docs where overlap can exceed the current end.
+        start = next_start if next_start > start else end
 
     return [c for c in chunks if c]

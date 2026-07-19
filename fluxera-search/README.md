@@ -63,7 +63,7 @@ See full details in `docs/API.md`.
 
    ```bash
    docker exec -it fluxera-ollama ollama pull qwen2.5:1.5b
-   docker exec -it fluxera-ollama ollama pull bge-m3
+   docker exec -it fluxera-ollama ollama pull mxbai-embed-large
    ```
 
 4. Open:

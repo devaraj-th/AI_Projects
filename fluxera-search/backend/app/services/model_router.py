@@ -1,3 +1,6 @@
+from app.core.config import settings
+
+
 MODEL_ROUTING = {
     "Fluxera AI": "qwen2.5:1.5b",
     "Qwen": "qwen2.5:1.5b",
@@ -9,4 +12,7 @@ MODEL_ROUTING = {
 
 
 def resolve_model(model_label: str) -> str:
-    return MODEL_ROUTING.get(model_label, model_label)
+    resolved = MODEL_ROUTING.get(model_label, model_label)
+    if settings.llm_provider == "ollama" and resolved in {"gpt-4o-mini", "claude-3-5-sonnet"}:
+        return settings.default_model
+    return resolved

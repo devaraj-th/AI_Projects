@@ -36,14 +36,29 @@ export default function ChatPage() {
   }
 
   async function ask() {
-    if (!token || !question.trim()) return;
+    if (!question.trim()) {
+      setError("Please enter a question.");
+      return;
+    }
+
+    let activeToken = token;
+    if (!activeToken) {
+      try {
+        activeToken = await login("admin@fluxera.ai", "admin123");
+        setToken(activeToken);
+      } catch {
+        setError("Authentication failed. Click Quick Login and try again.");
+        return;
+      }
+    }
+
     setLoading(true);
     setError("");
     setAnswer("");
     setCitations([]);
     try {
       await streamChat(
-        token,
+        activeToken,
         {
           question,
           model,

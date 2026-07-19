@@ -14,7 +14,7 @@
 
    `docker exec -it fluxera-ollama ollama pull qwen3:8b`
 
-   `docker exec -it fluxera-ollama ollama pull bge-m3`
+   `docker exec -it fluxera-ollama ollama pull mxbai-embed-large`
 
 4. Open apps:
 

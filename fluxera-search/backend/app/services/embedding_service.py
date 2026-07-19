@@ -18,13 +18,31 @@ class EmbeddingService:
 
     async def _embed_ollama(self, text: str) -> list[float]:
         async with httpx.AsyncClient(timeout=30) as client:
+            # Ollama >=0.3 uses /api/embed with "input". Older versions use /api/embeddings with "prompt".
             response = await client.post(
-                f"{self.base_url}/api/embeddings",
-                json={"model": settings.embedding_model, "prompt": text},
+                f"{self.base_url}/api/embed",
+                json={"model": settings.embedding_model, "input": text},
             )
+            if response.status_code == 404:
+                legacy_response = await client.post(
+                    f"{self.base_url}/api/embeddings",
+                    json={"model": settings.embedding_model, "prompt": text},
+                )
+                legacy_response.raise_for_status()
+                legacy_payload = legacy_response.json()
+                return legacy_payload.get("embedding") or self._fallback_embedding(text)
+
             response.raise_for_status()
             payload = response.json()
-            return payload.get("embedding") or self._fallback_embedding(text)
+            embedding = payload.get("embedding")
+            if embedding:
+                return embedding
+
+            embeddings = payload.get("embeddings")
+            if embeddings and isinstance(embeddings, list) and embeddings[0]:
+                return embeddings[0]
+
+            return self._fallback_embedding(text)
 
     async def _embed_openai_compatible(self, text: str) -> list[float]:
         headers = {"Content-Type": "application/json"}

@@ -29,13 +29,14 @@ export default function UploadPage() {
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (!file) return;
-            setStatus("Uploading and embedding...");
+            setStatus(`Uploading ${file.name} and generating embeddings...`);
             try {
               const tk = await ensureToken();
               const response = await uploadDocument(tk, file);
               setStatus(`Embedded: ${response.title}`);
-            } catch {
-              setStatus("Upload failed");
+            } catch (err) {
+              const message = err instanceof Error ? err.message : "Upload failed";
+              setStatus(message);
             }
           }}
           className="block w-full rounded-xl border border-line p-2"

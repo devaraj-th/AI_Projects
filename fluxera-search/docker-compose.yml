@@ -37,10 +37,10 @@ services:
       LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
       LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama:11434}
       LLM_API_KEY: ${LLM_API_KEY:-}
-      DEFAULT_MODEL: ${DEFAULT_MODEL:-qwen3:8b}
+      DEFAULT_MODEL: ${DEFAULT_MODEL:-qwen2.5:1.5b}
       EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-ollama}
       EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://ollama:11434}
-      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-bge-m3}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-mxbai-embed-large}
       VECTOR_DIMENSION: ${VECTOR_DIMENSION:-1024}
       CORS_ORIGINS: '["http://localhost:3000"]'
     ports:
@@ -48,18 +48,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      ollama:
-        condition: service_started
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
     container_name: fluxera-frontend
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
     ports:
       - "3000:3000"
     depends_on:

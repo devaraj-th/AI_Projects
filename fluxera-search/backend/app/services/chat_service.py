@@ -26,7 +26,11 @@ class ChatService:
 
     async def stream_answer(self, req: ChatRequest) -> AsyncGenerator[str, None]:
         retrieval = RetrievalService(self.db)
-        hits = await retrieval.search(req.question, top_k=10)
+        try:
+            hits = await retrieval.search(req.question, top_k=10)
+        except Exception:
+            # Keep chat available even if retrieval backend is temporarily unavailable.
+            hits = []
         citations = [
             Citation(
                 id=i + 1,

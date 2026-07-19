@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://fluxera:fluxera@postgres:5432/fluxera"
     vector_dimension: int = 1024
 
-    embedding_model: str = "bge-m3"
+    embedding_model: str = "mxbai-embed-large"
     embedding_provider: str = "ollama"
     embedding_base_url: str = "http://ollama:11434"
 
