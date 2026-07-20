@@ -2,26 +2,57 @@ def chunk_text(text: str, chunk_size: int = 1200, overlap: int = 180) -> list[st
     if not text.strip():
         return []
 
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    normalized = "\n".join(line.rstrip() for line in normalized.split("\n"))
+
     chunks: list[str] = []
     start = 0
-    length = len(text)
+    length = len(normalized)
+    min_split = int(chunk_size * 0.5)
 
     while start < length:
         end = min(start + chunk_size, length)
-        chunk = text[start:end]
 
         if end < length:
-            split_at = max(chunk.rfind("\n\n"), chunk.rfind(". "), chunk.rfind("\n"))
-            if split_at > int(chunk_size * 0.4):
-                end = start + split_at + 1
-                chunk = text[start:end]
+            window = normalized[start:end]
+            split_at = _choose_split_point(window, min_split)
+            if split_at is not None:
+                end = start + split_at
 
-        chunks.append(chunk.strip())
+        chunk = normalized[start:end].strip()
+        if chunk:
+            chunks.append(chunk)
+
         if end >= length:
             break
 
-        next_start = end - overlap
-        # Ensure forward progress for short docs where overlap can exceed the current end.
-        start = next_start if next_start > start else end
+        next_start = max(end - overlap, start + 1)
+        start = next_start
 
-    return [c for c in chunks if c]
+    return chunks
+
+
+def _choose_split_point(window: str, min_split: int) -> int | None:
+    delimiters = [
+        "\n## ",
+        "\n### ",
+        "\n\n",
+        ". ",
+        "? ",
+        "! ",
+        "\n",
+        "; ",
+        ", ",
+        " ",
+    ]
+
+    best = -1
+    for delimiter in delimiters:
+        idx = window.rfind(delimiter)
+        if idx > best and idx >= min_split:
+            best = idx + len(delimiter)
+
+    if best <= 0:
+        return None
+
+    return best

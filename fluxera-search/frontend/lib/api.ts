@@ -2,6 +2,37 @@ import { Citation } from "@/lib/types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 
+function resolveApiBase(): string {
+  if (typeof window === "undefined") return API_BASE;
+
+  if (API_BASE.startsWith("/")) {
+    return API_BASE;
+  }
+
+  try {
+    const configured = new URL(API_BASE, window.location.origin);
+
+    // Browser clients should default to same-origin proxy when API base points elsewhere.
+    if (configured.origin !== window.location.origin) {
+      return "/api";
+    }
+
+    return configured.pathname.replace(/\/$/, "") || "/api";
+  } catch {
+    return "/api";
+  }
+}
+
+function buildUrlCandidates(path: string): string[] {
+  const apiBase = resolveApiBase();
+  const directBase = resolveDirectBackendBase();
+  const candidates = [
+    `${apiBase}${path}`,
+    ...(directBase ? [`${directBase}${path}`] : [])
+  ];
+  return Array.from(new Set(candidates));
+}
+
 function resolveDirectBackendBase(): string | null {
   if (typeof window === "undefined") return null;
 
@@ -24,7 +55,8 @@ function resolveDirectBackendBase(): string | null {
 }
 
 export async function login(email: string, password: string): Promise<string> {
-  const res = await fetch(`${API_BASE}/auth/login`, {
+  const apiBase = resolveApiBase();
+  const res = await fetch(`${apiBase}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
@@ -35,20 +67,21 @@ export async function login(email: string, password: string): Promise<string> {
 }
 
 export async function fetchDocuments(token: string) {
-  const res = await fetch(`${API_BASE}/documents`, { headers: { Authorization: `Bearer ${token}` } });
+  const apiBase = resolveApiBase();
+  const res = await fetch(`${apiBase}/documents`, { headers: { Authorization: `Bearer ${token}` } });
   return res.json();
 }
 
 export async function fetchHistory(token: string) {
-  const res = await fetch(`${API_BASE}/history`, { headers: { Authorization: `Bearer ${token}` } });
+  const apiBase = resolveApiBase();
+  const res = await fetch(`${apiBase}/history`, { headers: { Authorization: `Bearer ${token}` } });
   return res.json();
 }
 
 export async function uploadDocument(token: string, file: File) {
   const formData = new FormData();
   formData.append("file", file);
-  const directBase = resolveDirectBackendBase();
-  const urls = directBase ? [`${directBase}/upload`, `${API_BASE}/upload`] : [`${API_BASE}/upload`];
+  const urls = buildUrlCandidates("/upload");
 
   let lastError: unknown = null;
   for (const uploadUrl of urls) {
@@ -86,12 +119,13 @@ export async function streamChat(
     system_prompt?: string;
   },
   onToken: (token: string) => void,
-  onDone: (meta: { conversation_id: number; citations: Citation[]; follow_ups: string[] }) => void
+  onDone: (meta: { conversation_id: number; citations: Citation[]; follow_ups: string[] }) => void,
+  onStatus?: (status: string) => void
 ) {
-  const directBase = resolveDirectBackendBase();
-  const urls = directBase ? [`${directBase}/chat`, `${API_BASE}/chat`] : [`${API_BASE}/chat`];
+  const urls = buildUrlCandidates("/chat");
 
   let lastError: unknown = null;
+  const errors: string[] = [];
   for (const chatUrl of urls) {
     try {
       const res = await fetch(chatUrl, {
@@ -125,6 +159,7 @@ export async function streamChat(
           if (!event.startsWith("data:")) continue;
           const raw = event.replace("data:", "").trim();
           const parsed = JSON.parse(raw);
+          if (parsed.type === "status" && onStatus) onStatus(parsed.stage || "");
           if (parsed.type === "token") onToken(parsed.token);
           if (parsed.type === "error") throw new Error(parsed.error || "Chat stream failed.");
           if (parsed.type === "done") {
@@ -140,10 +175,14 @@ export async function streamChat(
       return;
     } catch (err) {
       lastError = err;
+      errors.push(`${chatUrl}: ${err instanceof Error ? err.message : "request failed"}`);
     }
   }
 
   if (lastError instanceof Error) {
+    if (errors.length > 0) {
+      throw new Error(`Chat request failed after retries. ${errors.join(" | ")}`);
+    }
     throw lastError;
   }
   throw new Error("Chat request failed: network error");

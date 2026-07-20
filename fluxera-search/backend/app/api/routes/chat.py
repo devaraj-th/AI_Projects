@@ -19,4 +19,12 @@ async def chat(
     user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     service = ChatService(db, user_id=user.id)
-    return StreamingResponse(service.stream_answer(payload), media_type="text/event-stream")
+    return StreamingResponse(
+        service.stream_answer(payload),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )

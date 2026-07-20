@@ -61,7 +61,7 @@ class WebSearchService:
         query_payload = payload.get("query", {}) if isinstance(payload, dict) else {}
         search_rows = query_payload.get("search", []) if isinstance(query_payload, dict) else []
         if not isinstance(search_rows, list):
-            return []
+            search_rows = []
 
         results: list[WebSearchResult] = []
         for row in search_rows:
@@ -73,5 +73,52 @@ class WebSearchService:
                 continue
             url = f"https://en.wikipedia.org/?curid={page_id}"
             results.append(WebSearchResult(title=title, url=url, snippet=snippet))
+
+        if results:
+            return results
+
+        # Secondary fallback: DuckDuckGo instant answer API.
+        ddg_params = {
+            "q": query,
+            "format": "json",
+            "no_redirect": 1,
+            "no_html": 1,
+            "skip_disambig": 1,
+        }
+        try:
+            headers = {
+                "User-Agent": "FluxeraSearchBot/1.0 (https://github.com/devaraj-th/AI_Projects)",
+            }
+            async with httpx.AsyncClient(timeout=10, headers=headers) as client:
+                response = await client.get("https://api.duckduckgo.com/", params=ddg_params)
+                response.raise_for_status()
+                payload = response.json()
+        except Exception:
+            return []
+
+        abstract = str(payload.get("AbstractText", "")).strip()
+        abstract_url = str(payload.get("AbstractURL", "")).strip()
+        heading = str(payload.get("Heading", "")).strip() or "DuckDuckGo"
+        if abstract:
+            results.append(
+                WebSearchResult(
+                    title=heading,
+                    url=abstract_url or "https://duckduckgo.com",
+                    snippet=abstract,
+                )
+            )
+
+        related = payload.get("RelatedTopics", [])
+        if isinstance(related, list):
+            for item in related:
+                if len(results) >= max_results:
+                    break
+                if not isinstance(item, dict):
+                    continue
+                text = str(item.get("Text", "")).strip()
+                url = str(item.get("FirstURL", "")).strip()
+                if text and url:
+                    title = text.split(" - ")[0].strip() or "DuckDuckGo Result"
+                    results.append(WebSearchResult(title=title, url=url, snippet=text))
 
         return results

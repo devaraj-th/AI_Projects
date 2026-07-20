@@ -1,4 +1,5 @@
 import tempfile
+import json
 from pathlib import Path
 
 import httpx
@@ -42,7 +43,14 @@ class IngestService:
                     chunk_index=index,
                     content=chunk,
                     embedding=emb,
-                    metadata_json="{}",
+                    metadata_json=json.dumps(
+                        {
+                            "chunk_index": index,
+                            "chunk_length": len(chunk),
+                            "source_type": "upload",
+                            "title": filename,
+                        }
+                    ),
                 )
             )
 
@@ -126,7 +134,15 @@ class IngestService:
                     chunk_index=index,
                     content=chunk,
                     embedding=emb,
-                    metadata_json="{}",
+                    metadata_json=json.dumps(
+                        {
+                            "chunk_index": index,
+                            "chunk_length": len(chunk),
+                            "source_type": source_type,
+                            "source_uri": source_uri,
+                            "title": title,
+                        }
+                    ),
                 )
             )
 

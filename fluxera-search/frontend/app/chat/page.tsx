@@ -19,6 +19,8 @@ export default function ChatPage() {
   const [conversationId, setConversationId] = useState<number | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [streamStage, setStreamStage] = useState("");
+  const [answerSource, setAnswerSource] = useState("Not evaluated");
 
   const followUps = useMemo(
     () => ["Explain simply", "Give example", "Show diagram", "Compare alternatives"],
@@ -56,6 +58,8 @@ export default function ChatPage() {
     setError("");
     setAnswer("");
     setCitations([]);
+    setStreamStage("starting");
+    setAnswerSource("Evaluating...");
     try {
       await streamChat(
         activeToken,
@@ -71,9 +75,18 @@ export default function ChatPage() {
         (meta) => {
           setConversationId(meta.conversation_id);
           setCitations(meta.citations);
-        }
+          if (!meta.citations || meta.citations.length === 0) {
+            setAnswerSource("Insufficient Context");
+            return;
+          }
+          const hasWebSource = meta.citations.some((c) => Boolean(c.source_uri));
+          setAnswerSource(hasWebSource ? "Web Context" : "Local Context");
+        },
+        (status) => setStreamStage(status)
       );
     } catch (err) {
+      setAnswerSource("Connection Error");
+      setStreamStage("");
       setError(err instanceof Error ? err.message : "Chat failed.");
     } finally {
       setLoading(false);
@@ -102,14 +115,28 @@ export default function ChatPage() {
 
         <div className="space-y-3">
           <Input value={question} onChange={(e) => setQuestion(e.target.value)} />
-          <Button onClick={ask} disabled={loading || !token}>
+          <Button onClick={ask} disabled={loading}>
             {loading ? "Generating..." : "Ask Fluxera"}
           </Button>
         </div>
 
         <div className="mt-5 rounded-xl border border-line bg-blue-50/50 p-4 dark:bg-slate-800/50">
-          <h3 className="font-medium">Answer</h3>
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-medium">Answer</h3>
+            <span className="rounded-full border border-line bg-white px-3 py-1 text-xs dark:bg-slate-900">
+              Source: {answerSource}
+            </span>
+          </div>
+          {loading && (
+            <p className="mt-2 text-xs text-slate-500">
+              Stage: {streamStage || "starting"}
+            </p>
+          )}
+          {error && (
+            <p className="mt-2 text-sm text-red-600">
+              {error}. If this persists, refresh the page and verify backend/frontend containers are healthy.
+            </p>
+          )}
           <div className="mt-2 whitespace-pre-wrap text-sm leading-7">{answer || "Response will stream here..."}</div>
         </div>
 
