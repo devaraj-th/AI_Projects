@@ -81,7 +81,10 @@ export async function fetchHistory(token: string) {
 export async function uploadDocument(token: string, file: File) {
   const formData = new FormData();
   formData.append("file", file);
-  const urls = buildUrlCandidates("/upload");
+  // Always use the same-origin proxy route handler — never the direct backend URL.
+  // Cross-origin fallback causes CORS failures in Codespaces/remote environments.
+  const apiBase = resolveApiBase();
+  const urls = [`${apiBase}/upload`];
 
   let lastError: unknown = null;
   for (const uploadUrl of urls) {

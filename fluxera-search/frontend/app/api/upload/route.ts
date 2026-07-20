@@ -10,18 +10,18 @@ const BACKEND = process.env.BACKEND_INTERNAL_URL || "http://backend:8000";
 
 export async function POST(req: NextRequest) {
   const auth = req.headers.get("authorization") ?? "";
-  const contentType = req.headers.get("content-type") ?? "";
 
   try {
-    const body = await req.arrayBuffer();
+    // Parse multipart properly so boundary is re-derived by fetch when forwarding.
+    const formData = await req.formData();
 
     const upstream = await fetch(`${BACKEND}/upload`, {
       method: "POST",
       headers: {
         authorization: auth,
-        "content-type": contentType,
+        // Do NOT forward content-type — fetch sets it with the correct boundary.
       },
-      body,
+      body: formData,
     });
 
     const text = await upstream.text();
