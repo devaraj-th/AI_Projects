@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     default_model: str = "qwen2.5:1.5b"
     default_temperature: float = 0.2
     default_top_p: float = 0.9
-    default_max_tokens: int = 700
+    default_max_tokens: int = 2000
 
     upload_max_mb: int = 50
     max_chunks_per_document: int = 500

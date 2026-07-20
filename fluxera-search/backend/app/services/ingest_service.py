@@ -25,6 +25,17 @@ class IngestService:
         if len(chunks) > settings.max_chunks_per_document:
             chunks = chunks[: settings.max_chunks_per_document]
 
+        # Deduplicate: delete any previous upload with the same filename so stale
+        # chunks don't pollute retrieval and cause confusing answers.
+        existing = (
+            self.db.query(Document)
+            .filter(Document.title == filename, Document.source_type == "upload")
+            .all()
+        )
+        for old_doc in existing:
+            self.db.delete(old_doc)
+        self.db.flush()
+
         document = Document(
             title=filename,
             source_type="upload",
@@ -35,8 +46,14 @@ class IngestService:
         self.db.add(document)
         self.db.flush()
 
+        embedded_count = 0
         for index, chunk in enumerate(chunks):
-            emb = await self.embedding_service.embed(chunk)
+            try:
+                emb = await self.embedding_service.embed(chunk)
+            except Exception:
+                # Embedding service temporarily unavailable — skip chunk rather
+                # than failing the whole document.
+                continue
             self.db.add(
                 DocumentChunk(
                     document_id=document.id,
@@ -52,6 +69,13 @@ class IngestService:
                         }
                     ),
                 )
+            )
+            embedded_count += 1
+
+        if embedded_count == 0:
+            self.db.rollback()
+            raise ValueError(
+                "All chunks failed to embed. Check that the embedding model is running in Ollama."
             )
 
         document.status = "embedded"
@@ -126,8 +150,12 @@ class IngestService:
         self.db.add(document)
         self.db.flush()
 
+        embedded_count = 0
         for index, chunk in enumerate(chunks):
-            emb = await self.embedding_service.embed(chunk)
+            try:
+                emb = await self.embedding_service.embed(chunk)
+            except Exception:
+                continue
             self.db.add(
                 DocumentChunk(
                     document_id=document.id,
@@ -144,6 +172,13 @@ class IngestService:
                         }
                     ),
                 )
+            )
+            embedded_count += 1
+
+        if embedded_count == 0:
+            self.db.rollback()
+            raise ValueError(
+                "All chunks failed to embed. Check that the embedding model is running in Ollama."
             )
 
         document.status = "embedded"

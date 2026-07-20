@@ -9,6 +9,7 @@ class DocumentOut(BaseModel):
     source_type: str
     source_uri: str | None
     status: str
+    chunk_count: int = 0
     created_at: datetime
 
     class Config:

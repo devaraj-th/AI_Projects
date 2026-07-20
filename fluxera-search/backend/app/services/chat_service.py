@@ -173,10 +173,26 @@ class ChatService:
         else:
             context_lines = [f"[W{i + 1}] {result.title}: {result.snippet} ({result.url})" for i, result in enumerate(web_results)]
 
+        # Inject last 4 conversation turns so follow-ups have full context.
+        history_lines: list[str] = []
+        prior_messages = (
+            self.db.query(Message)
+            .filter(Message.conversation_id == conversation.id)
+            .order_by(Message.id.desc())
+            .limit(8)
+            .all()
+        )
+        for msg in reversed(prior_messages):
+            role_label = "User" if msg.role == "user" else "Assistant"
+            history_lines.append(f"{role_label}: {msg.content.strip()}")
+
+        history_section = ("\n\nConversation so far:\n" + "\n".join(history_lines)) if history_lines else ""
+
         prompt = (
             (req.system_prompt or SYSTEM_PROMPT)
             + "\n\nContext:\n"
             + "\n\n".join(context_lines)
+            + history_section
             + f"\n\nQuestion: {req.question}"
         )
 

@@ -36,7 +36,12 @@ async def upload_document(
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Upload processing failed: {exc}") from exc
-    return DocumentOut.model_validate(document)
+
+    from app.db.models import DocumentChunk
+    chunk_count = db.query(DocumentChunk).filter(DocumentChunk.document_id == document.id).count()
+    out = DocumentOut.model_validate(document)
+    out.chunk_count = chunk_count
+    return out
 
 
 @router.post("/url", response_model=DocumentOut)
