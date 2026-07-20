@@ -25,34 +25,36 @@ class IngestService:
         if len(chunks) > settings.max_chunks_per_document:
             chunks = chunks[: settings.max_chunks_per_document]
 
-        # Deduplicate: delete any previous upload with the same filename so stale
-        # chunks don't pollute retrieval and cause confusing answers.
+        # Find existing document with this title to update in-place (background path).
         existing = (
             self.db.query(Document)
-            .filter(Document.title == filename, Document.source_type == "upload")
-            .all()
+            .filter(Document.title == filename, Document.source_type == "upload", Document.status == "processing")
+            .first()
         )
-        for old_doc in existing:
-            self.db.delete(old_doc)
-        self.db.flush()
+        if existing:
+            document = existing
+        else:
+            # Deduplicate older uploads and create fresh record.
+            for old_doc in self.db.query(Document).filter(Document.title == filename, Document.source_type == "upload").all():
+                self.db.delete(old_doc)
+            self.db.flush()
+            document = Document(
+                title=filename,
+                source_type="upload",
+                source_uri=f"upload://{filename}",
+                mime_type=mime_type,
+                status="embedding",
+            )
+            self.db.add(document)
+            self.db.flush()
 
-        document = Document(
-            title=filename,
-            source_type="upload",
-            source_uri=f"upload://{filename}",
-            mime_type=mime_type,
-            status="embedding",
-        )
-        self.db.add(document)
-        self.db.flush()
+        document.status = "embedding"
+        self.db.commit()
 
         embedded_count = 0
-        for index, chunk in enumerate(chunks):
-            try:
-                emb = await self.embedding_service.embed(chunk)
-            except Exception:
-                # Embedding service temporarily unavailable — skip chunk rather
-                # than failing the whole document.
+        embeddings = await self.embedding_service.embed_batch(chunks)
+        for index, (chunk, emb) in enumerate(zip(chunks, embeddings)):
+            if not emb:
                 continue
             self.db.add(
                 DocumentChunk(
@@ -151,10 +153,9 @@ class IngestService:
         self.db.flush()
 
         embedded_count = 0
-        for index, chunk in enumerate(chunks):
-            try:
-                emb = await self.embedding_service.embed(chunk)
-            except Exception:
+        embeddings = await self.embedding_service.embed_batch(chunks)
+        for index, (chunk, emb) in enumerate(zip(chunks, embeddings)):
+            if not emb:
                 continue
             self.db.add(
                 DocumentChunk(

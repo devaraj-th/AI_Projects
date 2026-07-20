@@ -10,11 +10,58 @@ class EmbeddingService:
         self.base_url = settings.embedding_base_url.rstrip("/")
 
     async def embed(self, text: str) -> list[float]:
+        results = await self.embed_batch([text])
+        return results[0]
+
+    async def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Embed multiple texts in a single Ollama call — far faster than N sequential calls."""
+        if not texts:
+            return []
         if settings.embedding_provider == "ollama":
-            return await self._embed_ollama(text)
+            return await self._embed_batch_ollama(texts)
         if settings.embedding_provider in {"openai", "openai-compatible", "vllm"}:
-            return await self._embed_openai_compatible(text)
-        return self._fallback_embedding(text)
+            return await self._embed_batch_openai_compatible(texts)
+        return [self._fallback_embedding(t) for t in texts]
+
+    async def _embed_batch_ollama(self, texts: list[str]) -> list[list[float]]:
+        try:
+            async with httpx.AsyncClient(timeout=120) as client:
+                response = await client.post(
+                    f"{self.base_url}/api/embed",
+                    json={"model": settings.embedding_model, "input": texts},
+                )
+                if response.status_code != 404:
+                    response.raise_for_status()
+                    payload = response.json()
+                    embeddings = payload.get("embeddings")
+                    if embeddings and len(embeddings) == len(texts):
+                        return embeddings
+                # Fallback: legacy endpoint doesn't support batch — call one at a time.
+                results = []
+                for text in texts:
+                    results.append(await self._embed_ollama(text))
+                return results
+        except Exception:
+            return [self._fallback_embedding(t) for t in texts]
+
+    async def _embed_batch_openai_compatible(self, texts: list[str]) -> list[list[float]]:
+        headers = {"Content-Type": "application/json"}
+        if settings.llm_api_key:
+            headers["Authorization"] = f"Bearer {settings.llm_api_key}"
+        try:
+            async with httpx.AsyncClient(timeout=120) as client:
+                response = await client.post(
+                    f"{self.base_url}/v1/embeddings",
+                    headers=headers,
+                    json={"model": settings.embedding_model, "input": texts},
+                )
+                response.raise_for_status()
+                data = response.json().get("data", [])
+                if len(data) == len(texts):
+                    return [item["embedding"] for item in sorted(data, key=lambda x: x.get("index", 0))]
+        except Exception:
+            pass
+        return [self._fallback_embedding(t) for t in texts]
 
     async def _embed_ollama(self, text: str) -> list[float]:
         try:

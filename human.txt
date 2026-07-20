@@ -1,0 +1,143 @@
+Before I finally decided to read Leo Tolstoy’s War and Peace, I had heard many people regard it as the greatest novel ever written. What makes it so great? I wondered. Some praised its extraordinary storytelling and its large cast of vivid characters, while others admired its grand and incisive portrayal of his era’s society, from emperors and generals to aristocrats and peasants.
+
+After two months engrossed in the novel, what struck me most was something else: Tolstoy’s deep reflection on human life, which is not about rational thought or intelligence but about doing and living.
+
+Pierre Bezukhov, one of the protagonists, received the finest education in France and inherited enormous wealth from his father. Despite this, he struggled to find his purpose in life. He searched everywhere and tried everything he could. Unexpectedly, he found the answer from a soldier-prisoner: simply to live life by fully embracing each moment.
+
+Another protagonist, Prince Andrei Bolkonsky, was a talented intellectual with a deep, philosophical mind. However, as he came to realize the vanity, conceit, and ultimately the pointlessness of everything around him, he fell into a deep depression until he met Natasha Rostova, whose sheer force of life captivated him. She was like bright sunlight that warmed Andrei’s “cold” intellectual mind, giving him the joy and hope to live for.
+
+What Tolstoy has exemplified in his novel is the core of human existence, something that social standing or intelligence cannot substitute. This perspective echoes precisely Heidegger’s concept of Being (Dasein), which he believed all earlier philosophy before him had overlooked entirely. (If you’re new to Heidegger, you might consider reading one of my earlier articles to get a quick intro.)
+
+As Professor Hubert Dreyfus, widely known for his elucidation of Heidegger’s philosophy, noted in an interview:
+
+I think what Heidegger’s thinking is, that we’re always already in it, the meaning, the universe, the world, things that — that are. And it’s only from within it that we can deal with it and so forth, and that’s the leap. Instead of getting an answer, you sort of switch the position.
+
+We are all entangled in the world from birth and can’t view it as outsiders. The very act of living a vital life grounds and nourishes an enquiring mind. This was what Pierre and Andrei had to learn through their direct life experiences.
+
+In a society and culture that values rationality and reason as the crown of human intelligence, we tend to overlook the fact that we are primarily embodied, biological beings. The gap is more concerning now that AI seems to surpass, and could even replace, our rational thought process. We need to ask: do we really know ourselves? As human society advances by mainly looking outward, have we spent enough time looking inward?
+
+In this article, we will focus on understanding ourselves from three perspectives. First, how have computing metaphors shaped, or perhaps misled, our understanding of the brain? Second, why is art so difficult to define, even though it is central to human life? Finally, what role do emotions play in human cognition, and have we ignored them for too long?
+
+Ultimately, these explorations would help us think about the bigger question: what makes us human. Perhaps we will never be able to answer it, but at least we can get closer by connecting ideas and taking a small leap each time.
+
+The brain is not a computer
+In the 19th century, scientists primarily studied the brain anatomically. Notable examples include the discovery of Broca’s and Wernicke’s areas, which are primarily associated with speech production and comprehension, respectively. Around the same time, William James pioneered the discipline of psychology, branching out from philosophy, to study the brain holistically by examining behavior.
+
+In the 1940s and 1950s, the Second World War accelerated research on radar, communication systems, cryptography, and early computers. Researchers, including John von Neumann, began to question whether any of those technologies relate to the brain. In particular, Claude Shannon’s development of information theory greatly inspired the view of the biological brain as an information-processing machine.
+
+Shortly afterward, as computers became more dominant in industry, they became an even more powerful metaphor for human cognition. A computer receives input, transforms information, forms an internal representation, and produces output. Doesn’t the brain have the same processes, particularly for thinking?
+
+From then on, scientists began developing the computational theory of mind, in which mental processes were modeled as symbolic computations, the brain as hardware, and the mind as software implemented through rules and algorithms. At the same time, cognitive neuroscience was established to study memory, reasoning, language, and problem-solving, all the non-emotional cognitive functions that can supposedly be modeled mathematically by computational theories.
+
+Since the 1990s, the rise of artificial neural networks has illuminated a new path for neuroscience. As originally inspired by the biological brain, the remarkable success of AI makes it increasingly convincing that the brain is also a highly distributed neural network that might share similar learning algorithms and capabilities in pattern recognition, parallel processing, and distributed representation.
+
+While those metaphors have been useful for scientists and researchers investigating the mechanisms underlying cognitive functions, they have also become a framework that could potentially limit our thinking and obscure the fundamental differences between the brain and a supercomputer.
+
+First of all, the brain is a biological organ shaped by 4 billion years of evolution, not a computer. Because of its biological origin, there is no dichotomy between hardware and software. A computer is a machine designed by engineers. The brain is not designed. Neurons are self-organized from birth and develop organically throughout the lifetime.
+
+A computer is built to be operated by humans. Software must be implemented, and its output is viewed and interpreted by humans through a terminal or interface.
+
+By contrast, the brain “runs” autonomously, in concert with the body, a biological ecosystem that can’t survive without continuous interaction with the surrounding environment. There is no “homunculus” at the center of the brain that first views the internal representation, and then issues commands to control everything.
+
+To use vision as an example, we tend to think there is a computer-like internal representation in our mind that represents the image of the external world, a result of our retina capturing every detail of the environment like a camera.
+
+During the 1950s and 1960s, Russian psychologist and physiologist Alfred L. Yarbus designed a sophisticated apparatus to track human eye movements while viewing. He then conducted a series of ingenious experiments, as reported in his book, Eye Movements and Vision. The best-known one examines viewers’ gaze paths as they observe Ilya Repin’s painting An Unexpected Visitor (see the picture below).
+
+During the experiment, Yarbus gave the viewers different instructions each time, like identifying the characters’ ages, clothing, or relative positions, before recording their eye movements. He observed that their gaze shifted rapidly across the picture following different paths depending on the instruction.
+
+The results demonstrate that visual perception is an active process driven by specific eye movements, capturing selective information shaped by the viewer’s intention and attention. A natural implication is that the brain doesn’t need to form a complete image of the painting — the viewers see only what they choose to focus on.
+
+Press enter or click to view image in full size
+
+Example experiemental results from Eye Movements and Vision by Alfred L. Yarbus (1967). Image Source: Wikipedia Commons.
+American psychologist James J. Gibson further established this notion in his book The Ecological Approach to Visual Perception, published in 1979. He rejects the idea that perception is the internal representation built from sensory inputs. Instead, he proposes that organisms directly perceive meaningful information from their environments through movements and continuous engagement.
+
+Moreover, he emphasizes the environment’s active role in perception. A key concept in Gibson’s framework is “affordances” — the actionable possibilities an environment offers an organism, such as a ground surface that “affords” walking or a door handle that “affords” grasping. Affordances are relational: the objective properties depend on the observer’s capabilities. Moreover, they are perceived directly rather than inferred.
+
+In 1991, Francisco Varela, Evan Thompson, and Eleanor Rosch introduced the term “enactivism” in their book The Embodied Mind, defining it as “the manner in which a subject of perception creatively matches its actions to the requirements of its situation”. They also argue that cognition is not the representation of the world, but rather the “enactment” of a world based on sensorimotor interactions.
+
+Following suit, English neuroscientist J. Kevin O’Regan and American philosopher Aval Noë argue in this paper:
+
+“seeing is a way of acting.” It is a particular way of exploring the environment. Activity in internal representations does not generate the experience of seeing. The outside world serves as its own external representation. The experience of seeing occurs when the organism masters what we call the governing laws of sensorimotor contingency.”
+
+All these views explain why humans’ perception and cognition are remarkably resource-efficient. Because the surrounding environment already provides a full representation and a true world model, humans need only explore and interact with it incrementally and selectively.
+
+On the contrary, current AI models require substantial resources and lengthy training periods to achieve a complete representation within the deep neural network’s hidden layers. Once deployed, however, the model remains fixed and can no longer incorporate new training data.
+
+In other words, the computer metaphor suggests a passive intake of information. By contrast, humans actively take in information through intentional, attentive actions. This evolutionary endowment allows us to be extremely efficient by ignoring most of the information we don’t care about and focusing only on what is relevant. This is why attention matters. Meanwhile, intention gives us the sense of purpose.
+
+Strikingly, all these theories align with Heidegger’s concept of Being-in-the-world. As Professor Hubert Dreyfus mentioned in the same interview:
+
+“if something changes, like say, I get up and walk over there, how much in my representation of the situation in the computer has to change? Well, my shadow has to go with me, and my feet go with me. But most of the stuff over there doesn’t go at all, doesn’t change. But they couldn’t deal with that. And the only way to deal with it would have been to see what Heidegger saw, that the best model of the world is the world itself. You have to be in the world….So, we learn that our way of being in the world is such that we don’t have to store anything in our mind.
+
+Art expresses life
+Since Plato, the definitions of art, aesthetics, and beauty have been contemplated, theorized, and debated endlessly to this day. We are still baffled about what precisely counts as art. Yet no one disagrees that art is an essential activity in human societies, and that humans need art to comfort their souls and beauty to nourish their lives.
+
+In the Preface to Lyrical Ballads, Wordsworth made one of the foundational statements of the Romantic movement: “all good poetry is the spontaneous overflow of powerful feelings.” The poet emphasizes that poetry originates in emotion and communicates his inner experience, while recognizing that his memory, reflection, and language practices shape the feeling into art.
+
+Similarly, Leo Tolstoy, in his book “What is Art?”, proposes that art’s essence lies in the transmission of genuine feelings from the artist to the audience; therefore, art enables shared human understanding.
+
+Our feelings are private to each of us. An artwork has to connect with them in some way. Then how? Analytical philosopher Nelson Goodman took a stab at examining the artwork itself to decipher how the artistic symbols individuals create become meaningful to viewers.
+
+In his book The Language of Art, first published in 1968, he starts with the concept of a notational system whose symbols meet various syntactic constraints (i.e., a symbol should be distinct and not relate to others) and semantic criteria (e.g., a symbol’s meaning is non-ambiguous and non-overlapping with others).
+
+Goodman then recognizes different symbol systems underlie the various forms of art, such as poetry, plays, literature, music, paintings, sculpture, and architecture. While notationality is an ideal symbol system, all those artistic ones deviate from it in varying degrees.
+
+For example, music scores generally satisfy both the semantic and syntactic criteria. In contrast, ordinary language meets only the syntactic requirements, since ambiguity, redundancy, and overlapping word meanings hinder semantic clarity. Additionally, paintings and sculptures do not conform to any of these criteria for notionality. A painting’s symbols, such as shapes, colors, brushstrokes, texture, and even the material used, can convey multiple meanings at various levels.
+
+Similar to Wittgenstein’s theory that the meaning of language is determined by its use, Goodman states that these symbolic presentations require human cognitive ability to interpret and understand them. To go further, he emphasizes that symbolic presentations help humans establish internal mental structures consisting of concepts, schemata, and categories, which are developed and reorganized through art practices, conventions, and cultural influences.
+
+However, how different are these symbol systems from non-artistic ones, such as mathematical equations or computer programs? Why can the former express emotions and evoke feelings, while the latter can’t?
+
+Goodman first asserts that artistic expression is no different from other symbolic processes depending on learned interpretations. Additionally, he argues, those symbols possess properties of their own that evoke aesthetic feelings.
+
+In particular, artistic expression is the “metaphor exemplification” of certain properties of symbols. For example, a piece of music sounds sad. But sadness is not directly coded in the music score. Instead, it emerges from symbolic classifications (e.g., slow tempo, minor scale, etc.) that are transferable to listeners who understand the same conventions and draw the same metaphorical reference.
+
+Furthermore, because of violations of syntactic or semantic requirements, an art symbol system is subject to different interpretations from different perspectives. For instance, a painting is “syntactically dense,” so subtle differences between two shapes can convey substantial meaning. Similarly, the English language has high “semantic density” because many words have overlapping meanings with subtle distinctions.
+
+In other words, an artwork’s appeal in conveying emotions and feelings arises from its metaphorical exemplifications and “violations” of the criteria of the notational system, for which math and computer symbols have zero tolerance. Instead of having symbols strictly denote an object or process according to perfect syntactic and semantic rules, the true meaning of art appears to be introduced by creativity that tends to break away from those constraints, in order to capture, express, and convey the unlimited facets of human experience.
+
+This explains why humans need art: it is an activity that involves not just knowledge, or thinking, or perceiving, or memory, or emotion; it is all of them woven together that constitute our life experience. More importantly, it requires intimate interactions and active participation — art becomes more meaningful as we live with it.
+
+At the end of his book, Goodman reaches the same conclusion:
+
+“Sensory and emotive experiences are related in complex ways to the properties of objects. Also, emotions function cognitively not as separate items but in combination with one another and with other means of knowing. Perception, conception, and feeling intermingle and interact; and an alloy often resists analysis into emotive and nonemotive components.”
+
+Because art manifests humanity’s holistic experience of life itself, it helps us understand ourselves and brings us closer to the truth. Modern poet Dana Gioia articulates so well about poetry in one of his YouTube videos, which certainly applies to all forms of art:
+
+“Poetry awakens us to become alert to our own existence. It explores the paradox of being alive, knowing that this world and this life is our true home. And, yet, not feeling entirely at one with the world. So the purpose of poetry is to change in small, but meaningful ways, our lives.”
+
+Emotion is not the opposite of reason
+Over the past two decades, neuroscientists have also come to realize that emotional processes not only trigger automatic responses to external stimuli but also provide the value and motivation behind the everyday decisions we make. Moreover, emotional states strongly influence our selective attention to what we perceive, and the effectiveness of our learning and remembering.
+
+Neuroscientist Antonio Damasio describes in his book Descartes’ Error how patients with damage to the ventromedial prefrontal cortex, the region responsible for assessing emotional signals, become severely impaired decision-makers even though they have perfect logical reasoning. They struggle to prioritize, lose sight of the overall project, and may spend weeks or months on trivial tasks while ignoring more important ones.
+
+Damasio’s studies demonstrate that emotions guide us to what truly matters in life. Without emotions, reason becomes directionless and unsure of which actions are worthwhile. More importantly, emotions are grounded in the body, anchoring and aligning the mind with it.
+
+We often feel impulses that run counter to our rationality, especially when making important decisions. Yet most of our everyday emotions and feelings are subtler and harder to notice, although they are always there. As valence systems, they continually evaluate our relationship with the world, signaling what is beneficial or harmful and what is important or trivial.
+
+Given this, neuroscientists Seth Duncan and Lisa Feldman Barrett argue that emotion should be regarded as a form of cognition:
+
+There is no such thing as a ‘‘nonaffective thought’’. Affect plays a role in perception and cognition, even when people cannot feel its influence.
+
+In 2016, psychologist Kamil K. Imbir proposed a framework of emotion “duality”: the bottom-up “automatic emotion” versus the top-down “reflective emotion.” The former is the one we are most familiar with. It arises from sensing our inner body as “a neurophysiological barometer of the individual’s relationship to an environment at a given point in time.” On the other hand, the reflective aspect is the emotion that the mind instantiates, accompanying our rational thinking.
+
+For example, seeing a photograph of starving children immediately triggers our compassion or distress. Reading statistics on regional poverty and its severe impact on children’s development likely evokes a different kind of emotional response, which is less visceral yet still strongly tied to our values and moral judgments.
+
+In other words, reflective emotions are closely connected to our inner core principles, beliefs, and long-term goals, infusing our thinking and reasoning with a sense of personal importance.
+
+Neuroscience research supports this duality. The automatic pathway is subcortical, primarily involving the amygdala in the forebrain, which processes vital emotions linked to survival instincts, such as the “fight-or-flight” reaction. Conversely, the reflective pathway engages the prefrontal cortex, the brain’s executive center, which has extensive bidirectional connections with both the amygdala and thalamus. Consequently, emotions and cognition are intertwined, acting as interconnected aspects of a continuous process.
+
+In general, Damasio, Duncan and Barrett, and Imbir are among the neuroscientists who have recognized the importance of studying emotion from a fresh perspective that transcends its traditional boundary with cognition. As Professor Luiz Pessoa stated:
+
+many of the effects of emotion on cognition are best viewed as interactions between the two such that the resulting processes and signals are neither purely cognitive nor emotional. Instead, the “cognitive” or “emotional” nature of the processes is blurred in a way that highlights the integration of the two domains in the brain.
+
+Western philosophy has traditionally framed our view of the world through a series of fundamental dichotomies: mind and body, cognition and emotion, thought and action, and subject and object. These distinctions have also deeply influenced science and technology.
+
+However, to truly understand life, we need to look beyond those artificial boundaries. Human life is characterized by the continuous interplay of perception, emotion, cognition, and action, which drive our active engagement with the surrounding world. The brain is an embodied organ, and computational theory is far from accounting for its underlying biological mechanisms.
+
+Given this, a crucial question is whether we might have conflated intelligence with the entirety of human existence, even though no one can provide a clear definition of what intelligence truly is.
+
+In War and Peace, more than a hundred years before the advent of AI, Leo Tolstoy already understood that reason alone could not answer life’s deepest questions. Pierre found life’s purpose not through greater knowledge but by living in the moment. Andrei rediscovered hope not from books or arguments but through love. So thinking and living are not the same, and living has to precede. As supported by modern neuroscience, emotions instill a sense of meaning and purpose, without which cognition becomes untethered and aimless.
+
+Ultimately, the timelessness of Tolstoy’s novel lies in its truthful portrayal of what makes us human. We are not merely minds that compute to solve problems. We are beings who live in the world, who feel as deeply as we reason, who create art to enrich our lives, who search for meaning through interactions with the world and others. As humans continue to build increasingly intelligent machines, remembering this difference remains crucial as ever.

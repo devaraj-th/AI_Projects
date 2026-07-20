@@ -52,11 +52,34 @@ export default function UploadPage() {
     setStatus(`Uploading "${file.name}"…`);
     try {
       const response = await uploadDocument(activeToken, file);
-      const chunks = response.chunk_count ?? "?";
-      setStatus(`✓ Embedded "${response.title}" — ${chunks} chunk${chunks === 1 ? "" : "s"} indexed`);
-      setUploadedDocs((prev) => [{ title: response.title, chunks: response.chunk_count ?? 0 }, ...prev]);
+      // Upload returns immediately with status "processing". Poll until embedded.
+      setStatus(`Processing "${response.title}" — embedding chunks…`);
+      const docId = response.id;
+      let attempts = 0;
+      while (attempts < 60) {
+        await new Promise((r) => setTimeout(r, 2000));
+        attempts++;
+        try {
+          const poll = await fetch(`/api/documents/${docId}`, {
+            headers: { Authorization: `Bearer ${activeToken}` },
+          });
+          if (poll.ok) {
+            const doc = await poll.json();
+            if (doc.status === "embedded") {
+              const chunks = doc.chunk_count ?? "?";
+              setStatus(`✓ Embedded "${doc.title}" — ${chunks} chunk${chunks === 1 ? "" : "s"} indexed`);
+              setUploadedDocs((prev) => [{ title: doc.title, chunks: doc.chunk_count ?? 0 }, ...prev]);
+              return;
+            }
+            if (doc.status === "error") {
+              setStatus(`✗ Embedding failed for "${doc.title}". Check Ollama is running.`);
+              return;
+            }
+          }
+        } catch { /* keep polling */ }
+      }
+      setStatus(`✗ Timed out waiting for embedding. Check backend logs.`);
     } catch (err) {
-      // Show full raw error — never strip it.
       setStatus(`✗ ${err instanceof Error ? err.message : "Upload failed"}`);
     }
   }
